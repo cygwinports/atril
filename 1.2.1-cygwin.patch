@@ -1,0 +1,11 @@
+--- origsrc/mate-document-viewer-1.2.1/configure.ac	2012-03-15 05:37:04.000000000 -0500
++++ src/mate-document-viewer-1.2.1/configure.ac	2012-04-17 14:36:51.500445900 -0500
+@@ -98,7 +98,7 @@ AC_ARG_WITH([platform],
+     *) AC_MSG_ERROR([invalid argument "$withval" for --with-platform]) ;;
+    esac],
+   [case "$host" in
+-     *-*-mingw*|*-*-cygwin*) with_platform="win32" ;;
++     *-*-mingw*) with_platform="win32" ;;
+      *) with_platform=mate ;;
+    esac])
+ 

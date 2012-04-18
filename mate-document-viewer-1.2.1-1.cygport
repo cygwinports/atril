@@ -1,0 +1,7 @@
+inherit mate
+
+
+PATCH_URI="1.2.1-cygwin.patch
+           1.2.1-gtk-doc.patch"
+
+CYGCONF_ARGS="--libexecdir=/usr/lib/atril"
