@@ -1,0 +1,122 @@
+--- origsrc/mate-document-viewer-1.4.0/configure.ac	2012-11-14 19:40:48.245847000 -0600
++++ src/mate-document-viewer-1.4.0/configure.ac	2012-11-14 19:56:53.036175200 -0600
+@@ -272,7 +272,7 @@ fi
+ 
+ AC_ARG_WITH(keyring,
+         [AS_HELP_STRING([--without-keyring],
+-                        [Disable the use of mate-keyring])],
++                        [Disable the use of gnome-keyring])],
+         [],
+         [case "$with_platform" in
+            mate) with_keyring=yes ;;
+@@ -282,7 +282,7 @@ AC_ARG_WITH(keyring,
+ AM_CONDITIONAL([WITH_KEYRING],[test "$with_keyring" = "yes"])
+ 
+ if test "$with_keyring" = "yes"; then
+-        PKG_CHECK_MODULES(KEYRING, mate-keyring-1 >= $KEYRING_REQUIRED)
++        PKG_CHECK_MODULES(KEYRING, gnome-keyring-1 >= $KEYRING_REQUIRED)
+         AC_DEFINE([WITH_KEYRING],[1],[Define if KEYRING support is enabled])
+ fi
+ 
+--- origsrc/mate-document-viewer-1.4.0/shell/ev-keyring.c	2012-07-11 11:55:41.000000000 -0500
++++ src/mate-document-viewer-1.4.0/shell/ev-keyring.c	2012-11-14 19:58:27.492310900 -0600
+@@ -25,24 +25,24 @@
+ #include "ev-keyring.h"
+ 
+ #ifdef WITH_KEYRING
+-#include <mate-keyring.h>
++#include <gnome-keyring.h>
+ 
+-static const MateKeyringPasswordSchema doc_password_schema = {
+-	MATE_KEYRING_ITEM_GENERIC_SECRET,
++static const GnomeKeyringPasswordSchema doc_password_schema = {
++	GNOME_KEYRING_ITEM_GENERIC_SECRET,
+ 	{
+-		{ "type", MATE_KEYRING_ATTRIBUTE_TYPE_STRING },
+-		{ "uri",  MATE_KEYRING_ATTRIBUTE_TYPE_STRING },
++		{ "type", GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
++		{ "uri",  GNOME_KEYRING_ATTRIBUTE_TYPE_STRING },
+ 		{ NULL, 0 }
+ 	}
+ };
+-const MateKeyringPasswordSchema *EV_DOCUMENT_PASSWORD_SCHEMA = &doc_password_schema;
++const GnomeKeyringPasswordSchema *EV_DOCUMENT_PASSWORD_SCHEMA = &doc_password_schema;
+ #endif /* WITH_KEYRING */
+ 
+ gboolean
+ ev_keyring_is_available (void)
+ {
+ #ifdef WITH_KEYRING
+-	return mate_keyring_is_available ();
++	return gnome_keyring_is_available ();
+ #else
+ 	return FALSE;
+ #endif
+@@ -53,27 +53,27 @@ ev_keyring_lookup_password (const gchar
+ {
+ 	gchar             *retval = NULL;
+ #ifdef WITH_KEYRING
+-	MateKeyringResult result;
++	GnomeKeyringResult result;
+ 	gchar             *password = NULL;
+ 	
+ 	g_return_val_if_fail (uri != NULL, NULL);
+ 
+-	if (!mate_keyring_is_available ())
++	if (!gnome_keyring_is_available ())
+ 		return NULL;
+ 	
+-	result = mate_keyring_find_password_sync (EV_DOCUMENT_PASSWORD_SCHEMA,
++	result = gnome_keyring_find_password_sync (EV_DOCUMENT_PASSWORD_SCHEMA,
+ 						   &password,
+ 						   "type", "document_password",
+ 						   "uri", uri,
+ 						   NULL);
+-	if (result != MATE_KEYRING_RESULT_OK || !password) {
++	if (result != GNOME_KEYRING_RESULT_OK || !password) {
+ 		if (password)
+-			mate_keyring_free_password (password);
++			gnome_keyring_free_password (password);
+ 		return NULL;
+ 	}
+ 
+ 	retval = g_strdup (password);
+-	mate_keyring_free_password (password);
++	gnome_keyring_free_password (password);
+ #endif /* WITH_KEYRING */
+ 	return retval;
+ }
+@@ -84,14 +84,14 @@ ev_keyring_save_password (const gchar  *
+ 			  GPasswordSave flags)
+ {
+ #ifdef WITH_KEYRING
+-	MateKeyringResult result;
++	GnomeKeyringResult result;
+ 	const gchar       *keyring;
+ 	gchar             *name;
+ 	gchar             *unescaped_uri;
+ 
+ 	g_return_val_if_fail (uri != NULL, FALSE);
+ 
+-	if (!mate_keyring_is_available ())
++	if (!gnome_keyring_is_available ())
+ 		return FALSE;
+ 	
+ 	if (flags == G_PASSWORD_SAVE_NEVER)
+@@ -102,14 +102,14 @@ ev_keyring_save_password (const gchar  *
+ 	name = g_strdup_printf (_("Password for document %s"), unescaped_uri);
+ 	g_free (unescaped_uri);
+ 	
+-	result = mate_keyring_store_password_sync (EV_DOCUMENT_PASSWORD_SCHEMA,
++	result = gnome_keyring_store_password_sync (EV_DOCUMENT_PASSWORD_SCHEMA,
+ 						    keyring, name, password,
+ 						    "type", "document_password",
+ 						    "uri", uri,
+ 						    NULL);
+ 	g_free (name);
+ 
+-	return (result == MATE_KEYRING_RESULT_OK);
++	return (result == GNOME_KEYRING_RESULT_OK);
+ #else
+ 	return FALSE;
+ #endif /* WITH_KEYRING */

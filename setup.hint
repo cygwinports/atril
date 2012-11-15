@@ -1,5 +1,0 @@
-category: MATE
-requires: libatk1.0_0 libcairo2 libdjvulibre21 libgailutil18 libgdk_pixbuf2.0_0 libglib2.0_0 libgtk2.0_0 libICE6 libintl8 libkpathsea6 libmateconf2_4 libmate-keyring1 libpango1.0_0 libpoppler-glib8 libSM6 libspectre1 libtiff5 libX11_6 libxml2 zlib0
-sdesc: "MATE document viewer (aka Atril)"
-ldesc: "MATE is a fork of the GNOME 2 desktop. It provides an intuitive
-and attractive desktop to Linux users using traditional metaphors."
