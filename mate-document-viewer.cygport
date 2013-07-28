@@ -13,8 +13,6 @@ PATCH_URI="1.2.1-cygwin.patch
            1.4.0-gnome-keyring.patch"
 
 PKG_NAMES="${NAME} ${NAME}-devel mate-file-manager-document-properties"
-mate_document_viewer_CONTENTS="--exclude=gtk-doc etc/ usr/bin/ usr/lib/atril/ usr/share/"
+mate_document_viewer_CONTENTS="--exclude=gtk-doc etc/ usr/bin/ usr/lib/atril/ usr/libexec/ usr/share/"
 mate_document_viewer_devel_CONTENTS="usr/include/ usr/lib/lib* usr/lib/pkgconfig/ usr/share/gtk-doc/"
 mate_file_manager_document_properties_CONTENTS="usr/lib/caja/"
-
-CYGCONF_ARGS="--libexecdir=/usr/lib/atril"
