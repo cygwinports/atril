@@ -1,0 +1,22 @@
+inherit mate
+
+NAME="atril"
+VERSION=1.8.0
+RELEASE=1
+CATEGORY="MATE"
+SUMMARY="MATE document viewer"
+DESCRIPTION="MATE is a fork of the GNOME 2 desktop. It provides an intuitive
+and attractive desktop to Linux users using traditional metaphors."
+
+PATCH_URI="
+	1.2.1-cygwin.patch
+	1.2.1-gtk-doc.patch
+"
+
+PKG_NAMES="${NAME} ${NAME}-devel caja-document-properties"
+atril_OBSOLETES="mate-document-viewer"
+atril_CONTENTS="--exclude=gtk-doc etc/ usr/bin/ usr/lib/atril/ usr/libexec/ usr/share/"
+atril_devel_OBSOLETES="mate-document-viewer-devel"
+atril_devel_CONTENTS="usr/include/ usr/lib/lib* usr/lib/pkgconfig/ usr/share/gtk-doc/"
+caja_document_properties_OBSOLETES="mate-file-manager-document-properties"
+caja_document_properties_CONTENTS="usr/lib/caja/"
