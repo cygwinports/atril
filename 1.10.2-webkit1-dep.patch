@@ -1,0 +1,11 @@
+--- origsrc/atril-1.10.2/configure.ac	2015-09-24 10:39:20.790220200 -0500
++++ src/atril-1.10.2/configure.ac	2015-09-24 11:38:21.088292100 -0500
+@@ -138,7 +138,7 @@ case "$with_gtk" in
+        WEBKIT_API_VERSION=1.0
+        GAIL_API_VERSION=
+        GTK_REQUIRED=2.24.0
+-       WEBKIT_REQUIRED=2.4.3
++       WEBKIT_REQUIRED=2.0.0
+        ;;
+   3.0) GTK_API_VERSION=3.0
+        WEBKIT_API_VERSION=4.0

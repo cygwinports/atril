@@ -1,0 +1,43 @@
+--- origsrc/atril-1.10.2/backend/epub/Makefile.am	2014-10-28 14:24:49.000000000 -0500
++++ src/atril-1.10.2/backend/epub/Makefile.am	2015-09-24 11:39:14.148365300 -0500
+@@ -1,9 +1,8 @@
+-SUBDIRS = minizip MathJax
++SUBDIRS = MathJax
+ 
+ AM_CPPFLAGS = 		       			\
+ 	-I$(top_srcdir)				\
+ 	-I$(top_srcdir)/libdocument		\
+-	-I$(srcdir)/minizip			\
+ 	-DMATELOCALEDIR=\"$(datadir)/locale\"	\
+ 	-DATRIL_COMPILATION			\
+ 	$(BACKEND_CFLAGS)			\
+@@ -20,7 +19,6 @@ libepubdocument_la_SOURCES =	\
+ libepubdocument_la_LDFLAGS = $(BACKEND_LIBTOOL_FLAGS)
+ libepubdocument_la_LIBADD =				\
+ 	$(top_builddir)/libdocument/libatrildocument.la	\
+-	minizip/libminizip.la				\
+ 	$(EPUB_LIBS)					\
+ 	$(BACKEND_LIBS)					
+ 	
+--- origsrc/atril-1.10.2/configure.ac	2015-09-24 10:39:20.790220200 -0500
++++ src/atril-1.10.2/configure.ac	2015-09-24 11:38:21.088292100 -0500
+@@ -697,16 +697,16 @@ if test "x$enable_epub" = "xyes"; then
+     case "$with_gtk" in
+         2.0)
+         PKG_CHECK_MODULES(EPUB, webkit-$WEBKIT_API_VERSION >= $WEBKIT_REQUIRED \
+-	    libxml-2.0 >= $LIBXML_REQUIRED zlib,have_webkit=yes,have_webkit=no)
++	    libxml-2.0 >= $LIBXML_REQUIRED minizip,have_webkit=yes,have_webkit=no)
+ 	;;
+         3.0)
+         PKG_CHECK_MODULES(EPUB, webkit2gtk-$WEBKIT_API_VERSION >= $WEBKIT_REQUIRED \
+-	    libxml-2.0 >= $LIBXML_REQUIRED zlib,have_webkit=yes,have_webkit=no)
++	    libxml-2.0 >= $LIBXML_REQUIRED minizip,have_webkit=yes,have_webkit=no)
+         if test "x$have_webkit" = "xno"; then
+ 	   AC_MSG_NOTICE([Webkit2 4.0 not found, trying 3.0])
+            WEBKIT_API_VERSION=3.0
+            PKG_CHECK_MODULES(EPUB, webkit2gtk-$WEBKIT_API_VERSION >= $WEBKIT_REQUIRED \
+-	       libxml-2.0 >= $LIBXML_REQUIRED zlib,have_webkit=yes,have_webkit=no)
++	       libxml-2.0 >= $LIBXML_REQUIRED minizip,have_webkit=yes,have_webkit=no)
+         fi
+ 	;;
+ esac
