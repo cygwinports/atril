@@ -1,9 +1,8 @@
---- origsrc/atril-1.10.2/backend/epub/Makefile.am	2014-10-28 14:24:49.000000000 -0500
-+++ src/atril-1.10.2/backend/epub/Makefile.am	2015-09-24 11:39:14.148365300 -0500
-@@ -1,9 +1,8 @@
--SUBDIRS = minizip MathJax
-+SUBDIRS = MathJax
- 
+--- origsrc/atril-1.14.1/backend/epub/Makefile.am	2015-12-02 07:34:02.000000000 -0600
++++ src/atril-1.14.1/backend/epub/Makefile.am	2016-05-22 16:48:41.470725800 -0500
+@@ -1,9 +1,6 @@
+-SUBDIRS = minizip
+-
  AM_CPPFLAGS = 		       			\
  	-I$(top_srcdir)				\
  	-I$(top_srcdir)/libdocument		\
@@ -11,7 +10,7 @@
  	-DMATELOCALEDIR=\"$(datadir)/locale\"	\
  	-DATRIL_COMPILATION			\
  	$(BACKEND_CFLAGS)			\
-@@ -20,7 +19,6 @@ libepubdocument_la_SOURCES =	\
+@@ -20,7 +17,6 @@ libepubdocument_la_SOURCES =	\
  libepubdocument_la_LDFLAGS = $(BACKEND_LIBTOOL_FLAGS)
  libepubdocument_la_LIBADD =				\
  	$(top_builddir)/libdocument/libatrildocument.la	\
@@ -19,9 +18,9 @@
  	$(EPUB_LIBS)					\
  	$(BACKEND_LIBS)					
  	
---- origsrc/atril-1.10.2/configure.ac	2015-09-24 10:39:20.790220200 -0500
-+++ src/atril-1.10.2/configure.ac	2015-09-24 11:38:21.088292100 -0500
-@@ -697,16 +697,16 @@ if test "x$enable_epub" = "xyes"; then
+--- origsrc/atril-1.14.1/configure.ac	2016-05-22 16:47:36.582626300 -0500
++++ src/atril-1.14.1/configure.ac	2016-05-22 16:48:17.780693100 -0500
+@@ -588,16 +588,16 @@ if test "x$enable_epub" = "xyes"; then
      case "$with_gtk" in
          2.0)
          PKG_CHECK_MODULES(EPUB, webkit-$WEBKIT_API_VERSION >= $WEBKIT_REQUIRED \
