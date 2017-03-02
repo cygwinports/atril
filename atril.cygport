@@ -1,7 +1,7 @@
 inherit mate
 
 NAME="atril"
-VERSION=1.14.2
+VERSION=1.16.1
 RELEASE=1
 CATEGORY="MATE"
 SUMMARY="MATE document viewer"
@@ -26,3 +26,5 @@ caja_document_properties_OBSOLETES="mate-file-manager-document-properties"
 caja_document_properties_CONTENTS="usr/lib/caja/ usr/share/caja/"
 
 DISTCLEANFILES="backend/epub/minizip/*.h"
+
+CYGCONF_ARGS="--with-gtk=3.0"

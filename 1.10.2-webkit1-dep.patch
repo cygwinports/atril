@@ -1,6 +1,6 @@
 --- origsrc/atril-1.10.2/configure.ac	2015-09-24 10:39:20.790220200 -0500
 +++ src/atril-1.10.2/configure.ac	2015-09-24 11:38:21.088292100 -0500
-@@ -138,7 +138,7 @@ case "$with_gtk" in
+@@ -103,13 +103,13 @@ case "$with_gtk" in
         WEBKIT_API_VERSION=1.0
         GAIL_API_VERSION=
         GTK_REQUIRED=2.24.0
@@ -9,3 +9,311 @@
         ;;
    3.0) GTK_API_VERSION=3.0
         WEBKIT_API_VERSION=4.0
+        GAIL_API_VERSION=-3.0
+        GTK_REQUIRED=3.0.0
+-       WEBKIT_REQUIRED=2.4.3
++       WEBKIT_REQUIRED=2.0.0
+        ;;
+ esac
+ 
+@@ -595,8 +595,10 @@ if test "x$enable_epub" = "xyes"; then
+         if test "x$have_webkit" = "xno"; then
+ 	   AC_MSG_NOTICE([Webkit2 4.0 not found, trying 3.0])
+            WEBKIT_API_VERSION=3.0
+-           PKG_CHECK_MODULES(EPUB, webkit2gtk-$WEBKIT_API_VERSION >= $WEBKIT_REQUIRED \
++           PKG_CHECK_MODULES(EPUB, webkitgtk-$WEBKIT_API_VERSION >= $WEBKIT_REQUIRED \
+ 	       libxml-2.0 >= $LIBXML_REQUIRED minizip,have_webkit=yes,have_webkit=no)
++        else
++           AC_DEFINE([HAVE_WEBKIT2], [1], [Building with webkit2 API.])
+         fi
+ 	;;
+ esac
+--- origsrc/atril-1.16.0/libview/ev-jobs.c	2016-07-03 03:23:45.000000000 -0500
++++ src/atril-1.16.0/libview/ev-jobs.c	2017-03-01 14:53:25.582800900 -0600
+@@ -42,7 +42,7 @@
+ 
+ #include <gtk/gtk.h>
+ #if ENABLE_EPUB
+-#if GTK_CHECK_VERSION(3, 0, 0)
++#if HAVE_WEBKIT2
+ #include <webkit2/webkit2.h>
+ #else
+ #include <webkit/webkit.h>
+@@ -831,7 +831,7 @@ ev_job_thumbnail_dispose (GObject *objec
+ }
+ 
+ #if ENABLE_EPUB
+-#if !GTK_CHECK_VERSION(3, 0, 0)
++#if !HAVE_WEBKIT2
+ static void
+ web_thumbnail_get_screenshot_cb(GObject        *object,
+                                 GParamSpec     *pspec,
+@@ -939,7 +939,7 @@ webview_load_failed_cb (WebKitWebView  *
+ 	ev_job_failed_from_error (EV_JOB(job_thumb), e);
+ 	return TRUE;
+ }
+-#endif  /* GTK_CHECK_VERSION */
++#endif  /* HAVE_WEBKIT2 */
+ #endif  /* ENABLE_EPUB */
+ 
+ static gboolean
+@@ -973,7 +973,7 @@ ev_job_thumbnail_run (EvJob *job)
+ 	if (job->document->iswebdocument == TRUE) {
+ 		if (!webview) {
+ 			webview = webkit_web_view_new();
+-#if !GTK_CHECK_VERSION (3, 0, 0)
++#if !HAVE_WEBKIT2
+ 			g_object_connect(WEBKIT_WEB_VIEW(webview),"signal::notify::load-status",
+ 			                 G_CALLBACK(web_thumbnail_get_screenshot_cb),
+ 			                 g_object_ref (job_thumb),
+@@ -988,7 +988,7 @@ ev_job_thumbnail_run (EvJob *job)
+ 			g_signal_connect(WEBKIT_WEB_VIEW(webview),"load-failed",
+ 			                 G_CALLBACK(webview_load_failed_cb),
+ 			                 g_object_ref (job_thumb));
+-#endif  /* GTK_CHECK_VERSION */
++#endif  /* HAVE_WEBKIT2 */
+ 		}
+ 
+ 		if (!offscreenwindow) {
+--- origsrc/atril-1.16.0/libview/ev-web-view.c	2016-07-03 03:23:45.000000000 -0500
++++ src/atril-1.16.0/libview/ev-web-view.c	2017-03-01 14:55:11.115647200 -0600
+@@ -25,7 +25,7 @@
+ #include <gtk/gtk.h>
+ #include <stdlib.h>
+ 
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ #include <webkit2/webkit2.h>
+ #else
+ #include <webkit/webkit.h>
+@@ -62,7 +62,7 @@ struct _EvWebView
+ 	gboolean inverted_stylesheet ;
+ 	gboolean fullscreen;
+ 	SearchParams *search;
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 	WebKitFindController *findcontroller;
+ 	WebKitFindOptions findoptions;
+ 	gdouble zoom_level;
+@@ -180,7 +180,7 @@ ev_web_view_change_page (EvWebView *webv
+ 
+ 	webview->current_page = new_page;
+ 	ev_document_model_set_page(webview->model,new_page);
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 	webkit_find_controller_search_finish(webview->findcontroller);
+ #else
+ 	webkit_web_view_unmark_text_matches (WEBKIT_WEB_VIEW(webview));
+@@ -219,7 +219,7 @@ ev_web_view_new (void)
+ 
+ 	webview = g_object_new (EV_TYPE_WEB_VIEW, NULL);
+ 
+-	#if GTK_CHECK_VERSION (3, 0, 0)
++	#if HAVE_WEBKIT2
+ 		EV_WEB_VIEW(webview)->findcontroller = webkit_web_view_get_find_controller (WEBKIT_WEB_VIEW(webview));
+ 		EV_WEB_VIEW(webview)->findoptions = webkit_find_controller_get_options (EV_WEB_VIEW(webview)->findcontroller);
+ 
+@@ -442,7 +442,7 @@ ev_web_view_handle_link(EvWebView *webvi
+ }
+ /* Searching */
+ 
+-#if !GTK_CHECK_VERSION (3, 0, 0)
++#if !HAVE_WEBKIT2
+ static void
+ jump_to_find_result_on_page(EvWebView *webview,
+                             EvWebViewFindDirection direction)
+@@ -471,7 +471,7 @@ jump_to_find_result_on_page(EvWebView *w
+ }
+ #endif
+ 
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ static void
+ results_counted_cb(WebKitFindController *findcontroller,
+                    guint match_count,
+@@ -489,7 +489,7 @@ results_counted_cb(WebKitFindController
+ /*
+  * Jump to find results once we have changed the page in the webview.
+  */
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ static void
+ jump_to_find_results(EvWebView *webview,
+                      WebKitLoadEvent load_event,
+@@ -501,7 +501,7 @@ jump_to_find_results(EvWebView *webview,
+                     gpointer    data)
+ #endif
+ {
+-	#if !GTK_CHECK_VERSION (3, 0, 0)
++	#if !HAVE_WEBKIT2
+ 	gint n_results;
+ 	gboolean forward ;
+ 	gboolean wrap ;
+@@ -518,7 +518,7 @@ jump_to_find_results(EvWebView *webview,
+ 		return;
+ 	}
+ 
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 	if (webview->search->direction == EV_WEB_VIEW_FIND_NEXT) {
+ 		webview->findoptions &= ~WEBKIT_FIND_OPTIONS_BACKWARDS;
+ 		webview->findoptions &= ~WEBKIT_FIND_OPTIONS_WRAP_AROUND;
+@@ -599,7 +599,7 @@ jump_to_find_page (EvWebView *webview, E
+ 			page = page + n_pages;
+ 
+ 		if (page == webview->current_page && ev_web_view_find_get_n_results(webview,page) > 0) {
+-#if !GTK_CHECK_VERSION (3, 0, 0)
++#if !HAVE_WEBKIT2
+ 			jump_to_find_result_on_page(webview,EV_WEB_VIEW_FIND_NEXT);
+ #else
+ 			if (direction == EV_WEB_VIEW_FIND_PREV) {
+@@ -627,7 +627,7 @@ jump_to_find_page (EvWebView *webview, E
+ 
+ 		if (ev_web_view_find_get_n_results (webview, page) > 0) {
+ 			webview->search->direction = direction;
+-#if !GTK_CHECK_VERSION (3, 0, 0)
++#if !HAVE_WEBKIT2
+ 			webkit_web_view_unmark_text_matches (WEBKIT_WEB_VIEW(webview));
+ #else
+ 			webkit_find_controller_search_finish(webview->findcontroller);
+@@ -646,7 +646,7 @@ ev_web_view_find_changed (EvWebView *web
+ 	webview->search->search_string = g_strdup(text);
+ 	webview->search->case_sensitive = case_sensitive;
+ 		if (webview->search->search_jump == TRUE) {
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 		if (!case_sensitive) {
+ 			webview->findoptions |=	 WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE;
+ 		}
+@@ -671,7 +671,7 @@ ev_web_view_find_next (EvWebView *webvie
+ 		jump_to_find_page (webview, EV_WEB_VIEW_FIND_NEXT, 1);
+ 	} 
+ 	else {
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 		webkit_find_controller_search_next(webview->findcontroller);
+ #else
+ 		jump_to_find_result_on_page (webview, EV_WEB_VIEW_FIND_NEXT);
+@@ -688,7 +688,7 @@ ev_web_view_find_previous (EvWebView *we
+ 		jump_to_find_page (webview, EV_WEB_VIEW_FIND_PREV, -1);
+ 		webview->search->on_result = MAX (0, ev_web_view_find_get_n_results (webview, webview->current_page) - 1);
+ 	} else {
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 		webkit_find_controller_search_previous(webview->findcontroller);
+ #else
+ 		jump_to_find_result_on_page (webview,EV_WEB_VIEW_FIND_PREV);
+@@ -700,21 +700,21 @@ void
+ ev_web_view_find_search_changed (EvWebView *webview)
+ {
+ 	/* search string has changed, focus on new search result */
+-#if !GTK_CHECK_VERSION(3, 0, 0)	
++#if !HAVE_WEBKIT2
+ 	webkit_web_view_unmark_text_matches(WEBKIT_WEB_VIEW(webview));
+ #endif
+ 	if (webview->search->search_string) {
+ 		g_free(webview->search->search_string);
+ 		webview->search->search_string = NULL;
+ 	}
+-#if GTK_CHECK_VERSION(3, 0, 0)	
++#if HAVE_WEBKIT2
+ 	webkit_find_controller_search_finish(webview->findcontroller);
+ #endif
+ 	
+ 	webview->search->search_jump = TRUE;
+ }
+ 
+-#if !GTK_CHECK_VERSION (3, 0, 0)
++#if !HAVE_WEBKIT2
+ void
+ ev_web_view_find_set_highlight_search (EvWebView *webview, gboolean value)
+ {
+@@ -725,7 +725,7 @@ ev_web_view_find_set_highlight_search (E
+ void
+ ev_web_view_find_cancel (EvWebView *webview)
+ {
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 	webkit_find_controller_search_finish (webview->findcontroller);
+ #else
+ 	webkit_web_view_unmark_text_matches(WEBKIT_WEB_VIEW(webview));
+@@ -740,14 +740,14 @@ ev_web_view_set_handler(EvWebView *webvi
+ {
+ 	if (visible) {
+ 		g_signal_connect(webview,
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 		                 "load-changed",
+ #else
+ 			             "notify::load-status",
+ #endif
+ 			             G_CALLBACK(jump_to_find_results),
+ 			             NULL);
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 			g_signal_connect(webview->findcontroller,
+ 		                 "counted-matches",
+ 		                 G_CALLBACK(results_counted_cb),
+@@ -758,7 +758,7 @@ ev_web_view_set_handler(EvWebView *webvi
+ 		g_signal_handlers_disconnect_by_func(webview,
+ 											 jump_to_find_results,
+ 											 NULL);		
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 		g_signal_handlers_disconnect_by_func(webview,
+ 		                                     results_counted_cb,
+ 		                                     NULL);
+@@ -767,7 +767,7 @@ ev_web_view_set_handler(EvWebView *webvi
+ }
+ 
+ /* Selection and copying*/
+-#if !GTK_CHECK_VERSION (3, 0, 0)
++#if !HAVE_WEBKIT2
+ gboolean 
+ ev_web_view_get_has_selection(EvWebView *webview)
+ {
+@@ -778,7 +778,7 @@ ev_web_view_get_has_selection(EvWebView
+ void
+ ev_web_view_select_all(EvWebView *webview)
+ {
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 	webkit_web_view_execute_editing_command(WEBKIT_WEB_VIEW(webview),
+ 	                                        WEBKIT_EDITING_COMMAND_SELECT_ALL);
+ #else
+@@ -786,7 +786,7 @@ ev_web_view_select_all(EvWebView *webvie
+ #endif
+ }
+ 
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ static void
+ copy_text_cb(WebKitWebView *webview,
+              GAsyncResult *res,
+@@ -806,7 +806,7 @@ copy_text_cb(WebKitWebView *webview,
+ void
+ ev_web_view_copy(EvWebView *webview)
+ {
+-#if !GTK_CHECK_VERSION (3, 0, 0)
++#if !HAVE_WEBKIT2
+ 	/* If for some reason we don't have a selection any longer,best to be safe */
+ 	if (ev_web_view_get_has_selection(webview) == FALSE)
+ 		return;
+@@ -828,7 +828,7 @@ ev_web_view_copy(EvWebView *webview)
+ gboolean
+ ev_web_view_zoom_in(EvWebView *webview)
+ {
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 	webkit_web_view_set_zoom_level (WEBKIT_WEB_VIEW(webview),
+ 	                                (webview->zoom_level+= 0.1));
+ #else
+@@ -840,7 +840,7 @@ ev_web_view_zoom_in(EvWebView *webview)
+ gboolean
+ ev_web_view_zoom_out(EvWebView *webview)
+ {
+-#if GTK_CHECK_VERSION (3, 0, 0)
++#if HAVE_WEBKIT2
+ 	if (webview->zoom_level == 1)
+ 		return FALSE;
+ 
