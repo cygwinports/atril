@@ -1,7 +1,7 @@
 inherit mate
 
 NAME="atril"
-VERSION=1.16.1
+VERSION=1.18.0
 RELEASE=1
 CATEGORY="MATE"
 SUMMARY="MATE document viewer"
@@ -10,13 +10,13 @@ and attractive desktop to Linux users using traditional metaphors."
 
 PATCH_URI="
 	1.2.1-gtk-doc.patch
-	1.14.1-system-minizip.patch
-	1.10.2-webkit1-dep.patch
+	1.18.0-system-minizip.patch
 "
+#	1.10.2-webkit1-dep.patch
 
 PKG_NAMES="${NAME} ${NAME}-devel ${NAME}-doc caja-document-properties"
 atril_OBSOLETES="mate-document-viewer"
-atril_REQUIRES="js-mathjax"
+#atril_REQUIRES="js-mathjax"
 atril_CONTENTS="--exclude=caja --exclude=gtk-doc etc/ usr/bin/ usr/lib/atril/ usr/libexec/ usr/share/"
 atril_devel_OBSOLETES="mate-document-viewer-devel"
 atril_devel_CONTENTS="usr/include/ usr/lib/lib* usr/lib/pkgconfig/"
@@ -26,5 +26,3 @@ caja_document_properties_OBSOLETES="mate-file-manager-document-properties"
 caja_document_properties_CONTENTS="usr/lib/caja/ usr/share/caja/"
 
 DISTCLEANFILES="backend/epub/minizip/*.h"
-
-CYGCONF_ARGS="--with-gtk=3.0"

@@ -1,0 +1,36 @@
+--- origsrc/atril-1.18.0/backend/epub/Makefile.am	2016-11-16 15:10:57.000000000 -0600
++++ src/atril-1.18.0/backend/epub/Makefile.am	2017-05-01 11:24:05.760395300 -0500
+@@ -1,9 +1,6 @@
+-SUBDIRS = minizip
+-
+ AM_CPPFLAGS = 		       			\
+ 	-I$(top_srcdir)				\
+ 	-I$(top_srcdir)/libdocument		\
+-	-I$(srcdir)/minizip			\
+ 	-DMATELOCALEDIR=\"$(datadir)/locale\"	\
+ 	-DATRIL_COMPILATION			\
+ 	$(BACKEND_CFLAGS)			\
+@@ -20,7 +17,6 @@ libepubdocument_la_SOURCES =	\
+ libepubdocument_la_LDFLAGS = $(BACKEND_LIBTOOL_FLAGS)
+ libepubdocument_la_LIBADD =				\
+ 	$(top_builddir)/libdocument/libatrildocument.la	\
+-	minizip/libminizip.la				\
+ 	$(EPUB_LIBS)					\
+ 	$(BACKEND_LIBS)					
+ 	
+--- origsrc/atril-1.18.0/configure.ac	2017-03-13 09:45:32.000000000 -0500
++++ src/atril-1.18.0/configure.ac	2017-05-01 11:23:59.747710800 -0500
+@@ -564,11 +564,11 @@ AC_ARG_ENABLE(epub,
+ have_webkit="no"
+ if test "x$enable_epub" = "xyes"; then
+     PKG_CHECK_MODULES(EPUB, webkit2gtk-4.0 >= $WEBKIT_REQUIRED \
+-       libxml-2.0 >= $LIBXML_REQUIRED zlib,have_webkit=yes,have_webkit=no)
++       libxml-2.0 >= $LIBXML_REQUIRED minizip,have_webkit=yes,have_webkit=no)
+     if test "x$have_webkit" = "xno"; then
+        AC_MSG_NOTICE([Webkit2 4.0 not found, trying 3.0])
+        PKG_CHECK_MODULES(EPUB, webkit2gtk-3.0 >= $WEBKIT_REQUIRED \
+-          libxml-2.0 >= $LIBXML_REQUIRED zlib,have_webkit=yes,have_webkit=no)
++          libxml-2.0 >= $LIBXML_REQUIRED minizip,have_webkit=yes,have_webkit=no)
+     fi
+ 
+     if test "x$have_webkit" = "xyes"; then
