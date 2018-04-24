@@ -1,7 +1,7 @@
 inherit mate
 
 NAME="atril"
-VERSION=1.18.1
+VERSION=1.20.1
 RELEASE=1
 CATEGORY="MATE"
 SUMMARY="MATE document viewer"
@@ -11,6 +11,7 @@ and attractive desktop to Linux users using traditional metaphors."
 PATCH_URI="
 	1.2.1-gtk-doc.patch
 	1.18.0-system-minizip.patch
+	1.20.1-without-webkit.patch
 "
 #	1.10.2-webkit1-dep.patch
 
